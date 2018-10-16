@@ -9,6 +9,17 @@
 #### 5. Item
 #### 6. Pet
 
+## 内置规则
+### 1. 场景概率
+### 2. 重生获得道具概率计算
+### 3. 掉落率
+### 4. 道具合成规则
+### 5. 宠物抽取概率
+### 6. 宠物类型和属性
+### 7. 宠物远征获得物品概率和计算
+
+
+
 ## 接口
 ### 1. 获取合约类型
 #### 接口功能
@@ -173,11 +184,11 @@
 }
 ```
 
-### 6. 获取玩家宠物
+### 6. 获取玩家装备
 #### 接口功能
-> 获取玩家宠物
+> 获取玩家装备
 #### URL
-> [http://localhost:8080/api/materials](http://localhost:8080/api/materials)
+> [http://localhost:8080/api/items](http://localhost:8080/api/items)
 #### HTTP请求方式
 > GET
 #### 请求参数
@@ -204,6 +215,20 @@
 #### 接口功能
 > 获取玩家宠物
 #### URL
+> [http://localhost:8080/api/pets](http://localhost:8080/api/pets)
+#### HTTP请求方式
+> GET
+#### 请求参数
+```
+{account_name: "zhaojian1111"}
+```
+#### 返回字段
+
+
+### 8. 获取宠物远征信息
+#### 接口功能
+> 获取宠物远征信息
+#### URL
 > [http://localhost:8080/api/petexp](http://localhost:8080/api/petexp)
 #### HTTP请求方式
 > GET
@@ -229,7 +254,7 @@
 }
 ```
 
-### 8. 获取玩家英雄
+### 9. 获取玩家英雄
 #### 接口功能
 > 获取玩家英雄
 #### URL
@@ -275,7 +300,7 @@
 }
 ```
 
-### 9. 最近材料价格
+### 10. 最近材料价格
 #### 接口功能
 > 最近材料价格
 #### URL
@@ -294,7 +319,7 @@
 }
 ```
 
-### 10. 最近装备价格
+### 11. 最近装备价格
 #### 接口功能
 > 最近装备价格
 #### URL
@@ -313,7 +338,7 @@
 }
 ```
 
-### 11. 在卖的材料/装备
+### 12. 在卖的材料/装备
 #### 接口功能
 > 在卖的材料
 #### URL
@@ -374,3 +399,120 @@
   "number": 0
 }
 ```
+
+### 13. 重生
+#### 接口功能
+> 重生
+#### URL
+> [http://localhost:8080/api/rebirth](http://localhost:8080/api/rebirth)
+#### HTTP请求方式
+> POST
+#### 请求参数
+```
+{account_name: "zhaojian1111"}
+```
+#### 返回字段
+
+### 14. 删除材料
+#### 接口功能
+> 删除材料
+#### URL
+> [http://localhost:8080/api/remove-materials](http://localhost:8080/api/remove-materials)
+#### HTTP请求方式
+> POST
+#### 请求参数
+```
+
+```
+#### 返回字段
+
+### 15. 删除装备
+#### 接口功能
+> 删除装备
+#### URL
+> [http://localhost:8080/api/remove-items](http://localhost:8080/api/remove-items)
+#### HTTP请求方式
+> POST
+#### 请求参数
+```
+
+```
+#### 返回字段
+
+### 16. 出售材料/装备
+#### 接口功能
+> 删除装备
+#### URL
+> [http://localhost:8080/api/sell-material](http://localhost:8080/api/sell-material)
+#### HTTP请求方式
+> POST
+#### 请求参数
+```
+
+```
+#### 返回字段
+
+### 17. 宠物远征
+#### 接口功能
+> 宠物远征
+#### URL
+> [http://localhost:8080/api/petexp](http://localhost:8080/api/petexp)
+#### HTTP请求方式
+> POST
+#### 请求参数
+```
+
+```
+#### 返回字段
+
+### 18. 宠物远征返回
+#### 接口功能
+> 宠物远征返回
+#### URL
+> [http://localhost:8080/api/pet-return](http://localhost:8080/api/pet-return)
+#### HTTP请求方式
+> POST
+#### 请求参数
+```
+
+```
+#### 返回字段
+
+### 19. 抽取宠物
+#### 接口功能
+> 抽取宠物
+#### URL
+> [http://localhost:8080/api/pet-gacha](http://localhost:8080/api/pet-gacha)
+#### HTTP请求方式
+> POST
+#### 请求参数
+```
+
+```
+#### 返回字段
+
+### 20. 道具合成
+#### 接口功能
+> 道具合成
+#### URL
+> [http://localhost:8080/api/items-combine](http://localhost:8080/api/items-combine)
+#### HTTP请求方式
+> POST
+#### 请求参数
+```
+
+```
+#### 返回字段
+
+### 21. 道具升级
+#### 接口功能
+> 道具合成
+#### URL
+> [http://localhost:8080/api/items-upgrade](http://localhost:8080/api/items-upgrade)
+#### HTTP请求方式
+> POST
+#### 请求参数
+```
+
+```
+#### 返回字段
