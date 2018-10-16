@@ -1,59 +1,109 @@
 <template>
   <div class="container">
+    <div class="status">
+      当前层：{{ currentFloor }}<br>
+      {{currentFloorMonsterCount}} / 10
+    </div>
+    <div class="kick-ass">
+      <div class="knights">
+        <Knight v-for="(item ,index) in knights" :key="index" :knight="item" />
+      </div>
+      <div class="monsters">
+        <Monster v-for="(item, index) in knights" :key="index" :knight="item" />
+      </div>
+      
+    </div>
+    <div class="info">
+      <div class="tabs">
+        <div class="tab" :class="{active: currentTab === 0}" @click="switchTab(0)">
+          英雄
+        </div>
+        <div class="tab" :class="{active: currentTab === 1}" @click="switchTab(1)">
+          骑士
+        </div>
+        <div class="tab" :class="{active: currentTab === 2}" @click="switchTab(2)">
+          弓箭手
+        </div>
+        <div class="tab" :class="{active: currentTab === 3}" @click="switchTab(3)">
+          魔法师
+        </div>
+      </div>
+      <div class="contents">
+        <div class="content" v-if="currentTab === 0">
+          <button @click="rebirth">复活</button>
+          <KnightData v-for="(item, index) in knights" :key="index" :knight="item" />
+        </div>
+        <div class="content" v-if="currentTab === 1">
+          1
+        </div>
+        <div class="content" v-if="currentTab === 2">
+          2
+        </div>
+        <div class="content" v-if="currentTab === 3">
+          3
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 import utils from '@/utils';
 import config from '@/config';
-
-var app = getApp();
+import Knight from '@/components/knight'
+import Monster from '@/components/monster'
+import KnightData from '@/components/knightData'
 
 export default {
   data() {
-    return {};
+    return {
+      currentTab: 0,
+      knights: [],
+      currentFloorMonsterCount: 0,
+      currentFloor: 1
+    };
   },
 
-  components: {},
+  components: {
+    Knight,
+    Monster,
+    KnightData
+  },
 
-  methods: {},
+  methods: {
+    switchTab(i){
+      this.currentTab = i;
+    },
+    rebirth(){
+
+    }
+  },
 
   created() {},
   async mounted() {
-    // 调用云函数，返回用户openId，参数为云函数名称
-    wx.cloud
-      .callFunction({ name: 'user' })
-      .then(res => {
-        console.log(res);
-        // 更新store中的openId
-        // this.$store.commit('updateOpenId', res.result);
-        // return this.WXP.getSetting();
-      })
-      // .then(res => {
-      //   // 检验是否授权
-      //   console.log(res)
-      //   const authUserInfo = res.authSetting['scope.userInfo'];
-      //   if (authUserInfo) {
-      //     this.$store.commit('updateAuthUserInfo', authUserInfo);
-      //   }
-      // })
-      .catch(err => console.error(err));
+    const openId = this.$wx.getStorageSync('openId');
+    if(!openId){
+      wx.cloud.callFunction({ name: 'user' })
+        .then(res => {
+          const openId = res.result.openId;
+          this.$wx.setStorageSync('openId', openId);
+          return openId;
+        })
+        .catch(err => console.error(err));
+    }
 
     const db = wx.cloud.database({ env: config.cloudEnv });
-    db
-      .collection('demo')
+    db.collection('knights')
       .get()
       .then(res => {
-        console.log(res);
+        const knights = res.data[0].rows;
+        this.knights = knights;
+        console.log(res.data[0].rows);
       })
       .catch(console.error);
 
-    let pages = getCurrentPages(); // 获取加载的页面
-    let currentPage = pages[pages.length - 1];
-    this.$http.testGet().then(res => {
-      // console.log(res)
-    });
-    const res = await this.$http.testGet();
+
+
   },
   onShareAppMessage() {
     let title = '',
@@ -67,10 +117,31 @@ export default {
 
 <style lang="scss" scoped>
 .container {
-  background: #000;
-  color: #fff;
-  a {
-    color: #fff;
+  .kick-ass{
+    display: flex;
+    .knights{
+      width: 50%;
+      display: flex;
+    }
+    .monsters{
+      width: 50%;
+      display: flex;
+    }
+  }
+  .info{
+    margin-top: 20px;
+    .tabs{
+      display: flex;
+      .tab{
+        width: 25%;
+        &.active{
+          color: red;
+        }
+      }
+    }
+    .contents{
+      margin-top: 20px;
+    }
   }
 }
 </style>

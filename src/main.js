@@ -3,6 +3,7 @@ import App from './App'
 import store from './store'
 import api from './http/api'
 import WXP from 'minapp-api-promise'
+import i18n from './i18n'
 
 // 初始化云开发
 wx.cloud.init({

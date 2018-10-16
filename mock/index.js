@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const Random = Mock.Random;
 
-router.get('/user', (req, res, next) => {
+router.get('/player', (req, res, next) => {
   res.json({"rows":[{"owner":"zhaojian1111","rows":[{"type":2,"level":9,"kill_count":149798,"attack":2155,"defense":652,"hp":1950,"luck":163},{"type":1,"level":12,"kill_count":140994,"attack":1960,"defense":550,"hp":1838,"luck":298},{"type":3,"level":9,"kill_count":129439,"attack":1874,"defense":822,"hp":1640,"luck":187}]}],"more":true})
 })
 
