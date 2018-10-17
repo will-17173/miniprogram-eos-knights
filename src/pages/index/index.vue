@@ -2,14 +2,15 @@
   <div class="container">
     <div class="status">
       当前层：{{ currentFloor }}<br>
-      {{currentFloorMonsterCount}} / 10
+      {{ totalKills % 10 }} / 10<br>
+      总共杀掉 {{ totalKills }}
     </div>
     <div class="kick-ass">
       <div class="knights">
-        <Knight v-for="(item ,index) in knights" :key="index" :knight="item" />
+        <Knight v-for="(knight ,index) in knights" :key="index" :knight="knight" />
       </div>
       <div class="monsters">
-        <Monster v-for="(item, index) in knights" :key="index" :knight="item" />
+        <Monster v-for="(knight, index) in knights" :key="index" :knight="knight" />
       </div>
       
     </div>
@@ -31,7 +32,7 @@
       <div class="contents">
         <div class="content" v-if="currentTab === 0">
           <button @click="rebirth">复活</button>
-          <KnightData v-for="(item, index) in knights" :key="index" :knight="item" />
+          <KnightData v-for="(knight, index) in knights" :key="index" :knight="knight" />
         </div>
         <div class="content" v-if="currentTab === 1">
           1
@@ -50,40 +51,92 @@
 <script>
 import utils from '@/utils';
 import config from '@/config';
-import Knight from '@/components/knight'
-import Monster from '@/components/monster'
-import KnightData from '@/components/knightData'
+import Knight from '@/components/knight';
+import Monster from '@/components/monster';
+import KnightData from '@/components/knightData';
+import kills from '@/rules/kills';
+import hpLeft from '@/rules/hpLeft';
+import maxSurviveTime from '@/rules/maxSurviveTime';
+import { showSuccess } from '@/utils';
+
+const db = wx.cloud.database({ env: config.cloudEnv });
 
 export default {
   data() {
     return {
       currentTab: 0,
       knights: [],
-      currentFloorMonsterCount: 0,
-      currentFloor: 1
+      knightStatus: {},
+      currentFloor: 1,
+      maxTime: null,
+      last_rebirth: null,
+      totalKills: 0,
     };
   },
 
   components: {
     Knight,
     Monster,
-    KnightData
+    KnightData,
   },
 
   methods: {
-    switchTab(i){
+    switchTab(i) {
       this.currentTab = i;
     },
-    rebirth(){
+    rebirth() {
+      const now = Date.now()
+      db
+        .collection('players')
+        .doc('W8cETJ25dhqgQPmq')
+        .update({
+          data: {
+            last_rebirth: now,
+          },
+        })
+        .then(console.log)
+        .catch(console.error);
+      
+      this.last_rebirth = now
+      
+      this.knights = this.knights.map(knight => {
+        console.log(knight)
+        knight.hpLeft = knight.hp;
+        knight.kills = 0;
+        return knight;
+      })
+      this.totalKills = 0;
 
-    }
+      showSuccess('复活成功');
+    },
+    tick() {
+      this.interval = setInterval(() => {
+        this.knights = this.knights.map(knight => {
+          const { hp, defense, attack } = knight;
+          knight.hpLeft = hpLeft(hp, defense, this.last_rebirth);
+          knight.kills = kills(hp, defense, attack, this.last_rebirth);
+          return knight;
+        });
+
+        this.totalKills = this.knights[0].kills + this.knights[1].kills + this.knights[2].kills;
+        this.currentFloor = Math.floor(this.totalKills / 10) + 1
+        console.log(this.totalKills )
+        
+
+        let timePassed = Math.floor((Date.now() - this.last_rebirth) / 1000);
+        if (timePassed > this.maxTime) {
+          clearInterval(this.interval);
+        }
+      }, 1000);
+    },
   },
 
   created() {},
   async mounted() {
     const openId = this.$wx.getStorageSync('openId');
-    if(!openId){
-      wx.cloud.callFunction({ name: 'user' })
+    if (!openId) {
+      wx.cloud
+        .callFunction({ name: 'user' })
         .then(res => {
           const openId = res.result.openId;
           this.$wx.setStorageSync('openId', openId);
@@ -92,18 +145,30 @@ export default {
         .catch(err => console.error(err));
     }
 
-    const db = wx.cloud.database({ env: config.cloudEnv });
-    db.collection('knights')
-      .get()
-      .then(res => {
-        const knights = res.data[0].rows;
-        this.knights = knights;
-        console.log(res.data[0].rows);
-      })
-      .catch(console.error);
+    const res = await db.collection('knights').get();
+    let knights = res.data[0].rows;
 
+    const res2 = await db.collection('players').get();
+    const { last_rebirth } = res2.data[0];
 
+    this.last_rebirth = last_rebirth;
 
+    //计算出剩余血量，已杀怪物数
+    const timePassed = (Date.now() - last_rebirth) / 1000;
+
+    knights = knights.map(knight => {
+      const { hp, defense, attack } = knight;
+      knight.hpLeft = hpLeft(hp, defense, last_rebirth);
+      knight.kills = kills(hp, defense, attack, last_rebirth);
+      return knight;
+    });
+    this.knights = knights;
+    this.totalKills = this.knights[0].kills + this.knights[1].kills + this.knights[2].kills;
+    this.currentFloor = Math.floor(this.totalKills / 10) + 1
+    this.maxTime = maxSurviveTime(knights);
+    if (timePassed < this.maxTime) {
+      this.tick();
+    }
   },
   onShareAppMessage() {
     let title = '',
@@ -117,29 +182,29 @@ export default {
 
 <style lang="scss" scoped>
 .container {
-  .kick-ass{
+  .kick-ass {
     display: flex;
-    .knights{
+    .knights {
       width: 50%;
       display: flex;
     }
-    .monsters{
+    .monsters {
       width: 50%;
       display: flex;
     }
   }
-  .info{
+  .info {
     margin-top: 20px;
-    .tabs{
+    .tabs {
       display: flex;
-      .tab{
+      .tab {
         width: 25%;
-        &.active{
+        &.active {
           color: red;
         }
       }
     }
-    .contents{
+    .contents {
       margin-top: 20px;
     }
   }

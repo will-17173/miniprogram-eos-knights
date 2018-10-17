@@ -1,8 +1,8 @@
 <template>
   <div class="knight-data">
     TYPE: {{knight.type}}<br>
-    HP: {{ knight.hp }} / {{ knight.hp }}<br>
-    Kills: {{kills}}<br>
+    HP: {{ knight.hpLeft }} / {{ knight.hp }}<br>
+    Kills: {{knight.kills}}<br>
     掉落概率: {{dropRate}}<br>
     魔幻水: {{magicWater}}
   </div>

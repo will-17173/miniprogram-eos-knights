@@ -1,6 +1,6 @@
 <template>
   <div class="knight">
-    {{knight.hp}}
+    {{knight.hpLeft}} / {{knight.hp}}
     <br>
     {{ knight.defense }}
   </div>

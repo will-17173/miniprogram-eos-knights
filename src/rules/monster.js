@@ -1,7 +1,7 @@
-export const attack = 10;
-export const hp = 10000;
+export const monsterAttack = 10000;
+export const monsterHp = 10000;
 
 export default {
-  attack,
-  hp
+  monsterAttack,
+  monsterHp
 }

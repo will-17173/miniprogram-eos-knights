@@ -2,7 +2,9 @@ const config = {
   version: 'v1.0.0',
   baseSDKVersion: '', // 基础库最低版本
   cloudEnv: 'coinfun-34c08b', // 云开发环境ID
-  constants: {
+};
+
+export const constants = {
     // 通过分享消息进小程序的场景值
     SHARE_SCENE_CODE: [
       1017, // 前往体验版入口
@@ -18,7 +20,7 @@ const config = {
       1049, // 手机相册选取小程序码
       1014, // 小程序模版消息
     ],
-  },
-};
+    KNIGHT_HP_REDUCE_RATE: 10000, // 英雄掉血系数 (怪物攻 - 英雄防) / 系数 = 每秒掉血
+}
 
 export default config;

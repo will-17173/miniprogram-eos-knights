@@ -1,7 +1,7 @@
 <template>
   <div class="monster">
     {{ knight.attack }}<br>
-    {{ hp }}
+    {{ monsterHp }}
   </div>
 </template>
 
@@ -14,7 +14,7 @@
 </style>
 
 <script>
-import { hp } from '@/rules/monster'
+import { monsterHp } from '@/rules/monster'
 
 export default {
   name: 'monster',
@@ -23,7 +23,7 @@ export default {
   },
   data(){
     return {
-      hp
+      monsterHp
     }
   }
 }
