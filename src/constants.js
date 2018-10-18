@@ -25,3 +25,6 @@ export const BASE_LUCK = 777
 
 // 每层掉落概率(累加)
 export const DROPRATE_EACH_FLOOR = .0002
+
+// 1级升2级打怪数量，以后每级*2
+export const LEVEL_UP_MONSTER_COUNT = 40

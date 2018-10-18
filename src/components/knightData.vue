@@ -4,7 +4,7 @@
     HP: {{ knight.hpLeft }} / {{ knight.hp }}<br>
     Kills: {{knight.kills}}<br>
     掉落概率: {{dropRate}}%<br>
-    魔幻水: {{magicWater}}
+    魔幻水: {{powder}}
   </div>
 </template>
 
@@ -17,6 +17,7 @@
 <script>
 import { POWDER_PER_KILL } from '@/constants'
 import calcDropRate from '@/rules/dropRate'
+import { SET_POWDER } from '@/store/mutation-types'
 
 export default {
   props: {
@@ -35,12 +36,15 @@ export default {
     };
   },
   computed: {
-    magicWater(){
+    powder(){
       return (this.knight.kills * POWDER_PER_KILL).toFixed(2)
     },
     dropRate(){
       return calcDropRate(this.knight, this.currentFloor, this.currentStage)
     }
+  },
+  mounted(){
+
   }
 };
 </script>

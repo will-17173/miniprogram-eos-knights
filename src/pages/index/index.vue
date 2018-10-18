@@ -1,6 +1,7 @@
 <template>
   <div class="container">
     <div class="status">
+      <Powder/>
       当前层：{{ currentFloor }}<br>
       {{ totalKills % 10 }} / 10<br>
       总共杀掉 {{ totalKills }}
@@ -58,6 +59,9 @@ import kills from '@/rules/kills';
 import hpLeft from '@/rules/hpLeft';
 import maxSurviveTime from '@/rules/maxSurviveTime';
 import { showSuccess } from '@/utils';
+import { POWDER_PER_KILL } from '@/constants'
+import { UPDATE_POWDER } from '@/store/mutation-types'
+import Powder from '@/components/powder'
 
 const db = wx.cloud.database({ env: config.cloudEnv });
 
@@ -72,6 +76,7 @@ export default {
       last_rebirth: null,
       currentStage: null,
       totalKills: 0,
+      powder: 0
     };
   },
 
@@ -79,6 +84,7 @@ export default {
     Knight,
     Monster,
     KnightData,
+    Powder
   },
 
   methods: {
@@ -87,28 +93,33 @@ export default {
     },
     rebirth() {
       const now = Date.now()
-      db
-        .collection('players')
+      let powderGet = Math.round(this.totalKills * POWDER_PER_KILL)
+      powderGet = powderGet == 0 ? 1 : powderGet;
+      this.$store.commit(UPDATE_POWDER, {
+        powder: powderGet + this.powder
+      })
+
+      db.collection('players')
         .doc('W8cETJ25dhqgQPmq')
         .update({
           data: {
             last_rebirth: now,
+            powder: powderGet + this.powder
           },
         })
-        .then(console.log)
+        .then(() => {
+          this.last_rebirth = now
+          this.knights = this.knights.map(knight => {
+            knight.hpLeft = knight.hp;
+            knight.kills = 0;
+            return knight;
+          })
+          this.totalKills = 0;
+          this.$bus.$emit('rebirth');
+          this.tick()
+          showSuccess('复活成功');
+        })
         .catch(console.error);
-      
-      this.last_rebirth = now
-      
-      this.knights = this.knights.map(knight => {
-        knight.hpLeft = knight.hp;
-        knight.kills = 0;
-        return knight;
-      })
-      this.totalKills = 0;
-      this.tick()
-
-      showSuccess('复活成功');
     },
     tick() {
       this.interval = setInterval(() => {
@@ -148,10 +159,14 @@ export default {
     let knights = res.data[0].rows;
 
     const res2 = await db.collection('players').get();
-    const { last_rebirth, current_stage } = res2.data[0];
+    const { last_rebirth, current_stage, powder } = res2.data[0];
 
     this.last_rebirth = last_rebirth;
     this.currentStage = current_stage;
+    this.powder = powder;
+    this.$store.commit(UPDATE_POWDER, {
+      powder: powder
+    })
 
     //计算出剩余血量，已杀怪物数
     const timePassed = (Date.now() - last_rebirth) / 1000;

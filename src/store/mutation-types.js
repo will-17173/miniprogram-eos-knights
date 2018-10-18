@@ -1,1 +1,1 @@
-export const GET_CATEGORY = 'GET_CATEGORY';
+export const UPDATE_POWDER = 'UPDATE_POWDER';
