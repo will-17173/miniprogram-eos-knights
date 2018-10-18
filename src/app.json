@@ -1,6 +1,7 @@
 {
   "pages": [
-    "pages/index/main"
+    "pages/index/main",
+    "pages/materials/main"
   ],
   "window": {
     "backgroundTextStyle": "light",
@@ -18,8 +19,8 @@
         "selectedIconPath": "/static/img/home-fill.png"
       },
       {
-        "pagePath": "pages/index/main",
-        "text": "首页",
+        "pagePath": "pages/materials/main",
+        "text": "材料",
         "iconPath": "/static/img/home.png",
         "selectedIconPath": "/static/img/home-fill.png"
       }
