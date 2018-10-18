@@ -15,17 +15,22 @@
 </style>
 
 <script>
+import { POWDER_PER_KILL } from '@/constants'
+
 export default {
   props: {
     knight: Object,
   },
   data() {
     return {
-      kills: 0,
       dropRate: 0,
-      magicWater: 0,
     };
   },
+  computed: {
+    magicWater(){
+      return (this.knight.kills * POWDER_PER_KILL).toFixed(2)
+    }
+  }
 };
 </script>
 
