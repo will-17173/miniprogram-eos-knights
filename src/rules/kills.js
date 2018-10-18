@@ -4,8 +4,7 @@
 // 最大可杀怪物数 = 存活时间 * 英雄攻击力 / 怪物血量
 
 import { monsterAttack, monsterHp } from '@/rules/monster'
-import { constants } from '@/config'
-const { KNIGHT_HP_REDUCE_RATE } = constants;
+import { KNIGHT_HP_REDUCE_RATE } from '@/constants'
 
 export default function(knightHp, knightDefense, knightAttack, last_rebirth){
   const hpReducePerSecond = (monsterAttack - knightDefense) / KNIGHT_HP_REDUCE_RATE // 每秒掉血

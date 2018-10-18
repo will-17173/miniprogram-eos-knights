@@ -21,6 +21,7 @@ export const constants = {
       1014, // 小程序模版消息
     ],
     KNIGHT_HP_REDUCE_RATE: 10000, // 英雄掉血系数 (怪物攻 - 英雄防) / 系数 = 每秒掉血
+    POWDER_PER_KILL: 0.03, // 杀掉一只怪得到的魔法水
 }
 
 export default config;

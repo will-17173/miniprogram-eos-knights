@@ -1,6 +1,6 @@
 import { monsterAttack } from '@/rules/monster'
-import { constants } from '@/config'
-const { KNIGHT_HP_REDUCE_RATE } = constants;
+import { KNIGHT_HP_REDUCE_RATE } from '@/constants'
+
 
 export default function(knights){
   let surviveTimes = [];
