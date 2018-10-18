@@ -12,9 +12,11 @@
       </div>
     </div>
     <div class="content" v-if="currentTab === 0">
+      <button>制作</button>
+      {{ myMaterialsCount }} <br>
       <div class="item" v-for="(material, i) in myMaterials" :key="i">
         {{material.name}}<br>
-        稀有度： {{material.rate}}<br>
+        稀有度： {{material.rare}}<br>
         类型: <span class="type" :class="'type' + material.type"></span>
       </div>
     </div>
@@ -34,7 +36,7 @@
       <div>
         <div class="item" v-for="(material, i) in materials" :key="i">
           {{material.name}}<br>
-          稀有值：{{material.rate}}<br>
+          稀有值：{{material.rare}}<br>
           材料类型： <span class="type" :class="'type' + material.type"></span><br>
           最近交易价格: 
         </div>
@@ -62,7 +64,9 @@
       margin-bottom: 20px;
     }
     .item{
-      border-bottom: 1rpx solid #ccc;
+      border: 1rpx solid #ccc;
+      width: 30%;
+      display: inline-block;
       .type{
         width: 32rpx;
         height: 32rpx;
@@ -91,7 +95,7 @@
 import materials from '@/db/materials'
 import materialTypes from '@/db/material-types'
 import { GET_MY_MATERIALS } from '@/store/mutation-types'
-import { mapState } from 'vuex'
+import { mapState, mapGetters } from 'vuex'
 
 export default {
   data(){
@@ -105,7 +109,10 @@ export default {
   computed:{
     ...mapState({
       myMaterials: state => state.myMaterials
-    })
+    }),
+    ...mapGetters([
+      'myMaterialsCount'
+    ])
   },
   methods: {
     switchTab(i){
@@ -124,7 +131,6 @@ export default {
   },
   mounted(){
     const openId = this.$wx.getStorageSync('openId')
-    console.log(openId)
     this.$store.dispatch(GET_MY_MATERIALS, { openId })
   }
 }

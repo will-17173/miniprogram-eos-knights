@@ -28,3 +28,9 @@ export const DROPRATE_EACH_FLOOR = .0002
 
 // 1级升2级打怪数量，以后每级*2
 export const LEVEL_UP_MONSTER_COUNT = 40
+
+// 默认材料格子数量
+export const DEFAULT_MATERIALS_CAPACITY = 28
+
+// 默认装备格子数量
+export const DEFAULT_ITEM_CAPACITY = 12

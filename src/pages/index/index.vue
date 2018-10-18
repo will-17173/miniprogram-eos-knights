@@ -33,7 +33,7 @@
       <div class="contents">
         <div class="content" v-if="currentTab === 0">
           <button @click="rebirth">复活</button>
-          <KnightData v-for="(knight, index) in knights" :key="index" :knight="knight" :currentFloor="currentFloor" :currentStage="currentStage" />
+          <KnightData v-for="(knight, index) in knights" :key="index" :knight="knight" :currentFloor="currentFloor" :currentStage="player.current_stage" />
         </div>
         <div class="content" v-if="currentTab === 1">
           1
@@ -59,9 +59,10 @@ import kills from '@/rules/kills';
 import hpLeft from '@/rules/hpLeft';
 import maxSurviveTime from '@/rules/maxSurviveTime';
 import { showSuccess, showModal } from '@/utils';
-import { POWDER_PER_KILL } from '@/constants'
-import { UPDATE_POWDER } from '@/store/mutation-types'
+import { POWDER_PER_KILL, DEFAULT_MATERIALS_CAPACITY } from '@/constants'
+import { UPDATE_POWDER, GET_MY_MATERIALS, UPDATE_PLAYER } from '@/store/mutation-types'
 import Powder from '@/components/powder'
+import { mapState } from 'vuex'
 
 const db = wx.cloud.database({ env: config.cloudEnv });
 wx.cloud.init()
@@ -77,7 +78,7 @@ export default {
       last_rebirth: null,
       currentStage: null,
       totalKills: 0,
-      powder: 0
+      player: {}
     };
   },
 
@@ -88,109 +89,150 @@ export default {
     Powder
   },
 
+  computed: {
+    ...mapState({
+      myMaterials: state => state.myMaterials
+    })
+  },
+
   methods: {
     switchTab(i) {
       this.currentTab = i;
     },
-    rebirth() {
+    async rebirth() {
+      /* 
+        重生要做的：
+          1. 增加魔法水 √
+          2. 得到材料 √
+          3. 重置 英雄血量√，打怪数量√
+          4. 更新 玩家最高层√ 上次复活时间√ 英雄总杀怪数 我的材料√
+          5. 调用 tick √
+      */
       const now = Date.now()
+
+      const count = await this.$store.dispatch(GET_MY_MATERIALS, {openId: this.openId})
+
+      if(count > DEFAULT_MATERIALS_CAPACITY){
+        showModal('提示', '材料格子满了，清掉一些再复活')
+        return;
+      }
+
+      this.interval && clearInterval(this.interval);
+
+      /* 
+        1. 增加魔幻水
+      */
       let powderGet = Math.round(this.totalKills * POWDER_PER_KILL)
-      powderGet = powderGet == 0 ? 1 : powderGet;
+      this.player.powder += powderGet == 0 ? 1 : powderGet;
       this.$store.commit(UPDATE_POWDER, {
-        powder: powderGet + this.powder
+        powder: this.player.powder
       })
 
-      db.collection('players')
-        .doc('W8cETJ25dhqgQPmq')
+      /* 
+        2. 如果层数破纪录，要更新下层数
+      */   
+      if(this.currentFloor > this.player.maxfloor){
+        this.player.maxfloor = this.currentFloor
+      }
+
+      const playerDocId = this.player._id;
+      let updatePlayerResult = await db.collection('players')
+        .doc(playerDocId)
         .update({
           data: {
             last_rebirth: now,
-            powder: powderGet + this.powder
-          },
+            powder: this.player.powder,
+            maxfloor: this.player.maxfloor
+          }
         })
-        .then(() => {
-          this.last_rebirth = now
-          this.knights = this.knights.map(knight => {
-            knight.hpLeft = knight.hp;
-            knight.kills = 0;
-            return knight;
-          })
-          this.totalKills = 0;
-          this.$bus.$emit('rebirth');
-          this.tick()
-          
 
-          wx.cloud
-            .callFunction({ name: 'material', data: {
-              owner: this.openId
-            } })
-            .then(res => {
-              let names = []
-              res.result.forEach(({ name }) => {
-                names.push(name)
-              })
-              names = names.join(',');
-              console.log(names)
-              showModal('复活成功', names)
-              // console.log(res.result)
-            })
+      if(updatePlayerResult.errMsg == 'document.update:ok' && updatePlayerResult.stats.updated == 1){
+
+        this.player.last_rebirth = now
+        this.knights = this.knights.map(knight => {
+          knight.hpLeft = knight.hp;
+          knight.kills = 0;
+          return knight;
         })
-        .catch(console.error);
+        this.totalKills = 0;
+        this.tick();
+
+        /* 
+          1. 得到材料
+        */
+        wx.cloud
+          .callFunction({ name: 'material', data: {
+            owner: this.openId
+          } })
+          .then(res => {
+            this.$store.dispatch(GET_MY_MATERIALS, { openId: this.openId })
+
+            /* 
+              1. 弹出提示
+            */    
+            let names = [] 
+            res.result.forEach(({ name }) => {
+              names.push(name)
+            })
+            names = names.join(',');
+            showModal('复活成功', names)
+          })
+      }
     },
     tick() {
+      const { last_rebirth } = this.player;
       this.interval = setInterval(() => {
+
         this.knights = this.knights.map(knight => {
           const { hp, defense, attack } = knight;
-          knight.hpLeft = hpLeft(hp, defense, this.last_rebirth);
-          knight.kills = kills(hp, defense, attack, this.last_rebirth);
+          knight.hpLeft = hpLeft(hp, defense, last_rebirth);
+          knight.kills = kills(hp, defense, attack, last_rebirth);
           return knight;
         });
 
         this.totalKills = this.knights[0].kills + this.knights[1].kills + this.knights[2].kills;
         this.currentFloor = Math.floor(this.totalKills / 10) + 1
 
-        let timePassed = Math.floor((Date.now() - this.last_rebirth) / 1000);
+        let timePassed = Math.floor((Date.now() - last_rebirth) / 1000);
         if (timePassed > this.maxTime) {
           clearInterval(this.interval);
         }
+
       }, 1000);
     },
   },
 
   created() {},
   async mounted() {
-    const openId = this.$wx.getStorageSync('openId');
-    
+
+    let openId = this.$wx.getStorageSync('openId');
     if (!openId) {
-      wx.cloud
-        .callFunction({ name: 'user' })
-        .then(res => {
-          const openId = res.result.openId;
-          this.$wx.setStorageSync('openId', openId);
-          this.openId = openId;
-          return openId;
-        })
-        .catch(err => console.error(err));
-    } else{
-      this.openId = openId;
+      let userRes = await wx.cloud.callFunction({ name: 'user' })
+      openId = userRes.result.openId;
+      this.$wx.setStorageSync('openId', openId);
+      // TODO: 未购买英雄的情况
     }
+    const knightsRes = await db.collection('knights').where({owner: openId}).get();
+    const playerRes = await db.collection('players').where({owner: openId}).get();
 
-    const res = await db.collection('knights').get();
-    let knights = res.data[0].rows;
+    console.log(knightsRes)
 
-    const res2 = await db.collection('players').get();
-    const { last_rebirth, current_stage, powder } = res2.data[0];
+    /* 
+      1. set openId
+    */
+    this.openId = openId;
 
-    this.last_rebirth = last_rebirth;
-    this.currentStage = current_stage;
-    this.powder = powder;
-    this.$store.commit(UPDATE_POWDER, {
-      powder: powder
-    })
+    /* 
+      2. 玩家信息
+    */
+    this.player = playerRes.data[0];
+    const { last_rebirth, powder } = this.player;
 
-    //计算出剩余血量，已杀怪物数
-    const timePassed = (Date.now() - last_rebirth) / 1000;
-
+    /* 
+      3. 处理英雄
+    */
+    let knights = knightsRes.data[0].rows;
+    this.knightDocId = knightsRes.data[0]._id;
     knights = knights.map(knight => {
       const { hp, defense, attack } = knight;
       knight.hpLeft = hpLeft(hp, defense, last_rebirth);
@@ -198,12 +240,38 @@ export default {
       return knight;
     });
     this.knights = knights;
+
+    /* 
+      4. 设置player, powder
+    */
+
+    this.$store.commit(UPDATE_PLAYER, {
+      player: this.player
+    })
+    this.$store.commit(UPDATE_POWDER, {
+      powder: powder
+    }) 
+  
+    /* 
+      4. 计算已杀怪物数
+    */
     this.totalKills = this.knights[0].kills + this.knights[1].kills + this.knights[2].kills;
+
+    /* 
+      5. 当前层
+    */
     this.currentFloor = Math.floor(this.totalKills / 10) + 1
+
+    /* 
+      6. 如果有英雄还没死掉，调用tick进行计算
+    */
+    const timePassed = (Date.now() - last_rebirth) / 1000;
     this.maxTime = maxSurviveTime(knights);
     if (timePassed < this.maxTime) {
       this.tick();
     }
+
+
   },
   onShareAppMessage() {
     let title = '',

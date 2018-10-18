@@ -1,2 +1,3 @@
 export const UPDATE_POWDER = 'UPDATE_POWDER';
 export const GET_MY_MATERIALS = 'GET_MY_MATERIALS';
+export const UPDATE_PLAYER = 'UPDATE_PLAYER';
