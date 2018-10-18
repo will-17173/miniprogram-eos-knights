@@ -15,8 +15,13 @@ export const SHARE_SCENE_CODE = [
 ]
 
 //英雄掉血系数 (怪物攻 - 英雄防) / 系数 = 每秒掉血 
-
 export const KNIGHT_HP_REDUCE_RATE = 10000
 
 // 杀掉一只怪得到的魔法水
 export const POWDER_PER_KILL = .03
+
+// 掉落率幸运系数
+export const BASE_LUCK = 777
+
+// 每层掉落概率(累加)
+export const DROPRATE_EACH_FLOOR = .0002

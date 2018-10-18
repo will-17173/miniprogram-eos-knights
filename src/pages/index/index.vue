@@ -32,7 +32,7 @@
       <div class="contents">
         <div class="content" v-if="currentTab === 0">
           <button @click="rebirth">复活</button>
-          <KnightData v-for="(knight, index) in knights" :key="index" :knight="knight" />
+          <KnightData v-for="(knight, index) in knights" :key="index" :knight="knight" :currentFloor="currentFloor" :currentStage="currentStage" />
         </div>
         <div class="content" v-if="currentTab === 1">
           1
@@ -70,6 +70,7 @@ export default {
       currentFloor: 1,
       maxTime: null,
       last_rebirth: null,
+      currentStage: null,
       totalKills: 0,
     };
   },
@@ -147,9 +148,10 @@ export default {
     let knights = res.data[0].rows;
 
     const res2 = await db.collection('players').get();
-    const { last_rebirth } = res2.data[0];
+    const { last_rebirth, current_stage } = res2.data[0];
 
     this.last_rebirth = last_rebirth;
+    this.currentStage = current_stage;
 
     //计算出剩余血量，已杀怪物数
     const timePassed = (Date.now() - last_rebirth) / 1000;

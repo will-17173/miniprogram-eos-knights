@@ -3,7 +3,7 @@
     TYPE: {{knight.type}}<br>
     HP: {{ knight.hpLeft }} / {{ knight.hp }}<br>
     Kills: {{knight.kills}}<br>
-    掉落概率: {{dropRate}}<br>
+    掉落概率: {{dropRate}}%<br>
     魔幻水: {{magicWater}}
   </div>
 </template>
@@ -16,19 +16,30 @@
 
 <script>
 import { POWDER_PER_KILL } from '@/constants'
+import calcDropRate from '@/rules/dropRate'
 
 export default {
   props: {
     knight: Object,
+    currentFloor: {
+      default: 1,
+      type: Number
+    },
+    currentStage: {
+      default: 0,
+      type: Number
+    }
   },
   data() {
     return {
-      dropRate: 0,
     };
   },
   computed: {
     magicWater(){
       return (this.knight.kills * POWDER_PER_KILL).toFixed(2)
+    },
+    dropRate(){
+      return calcDropRate(this.knight, this.currentFloor, this.currentStage)
     }
   }
 };
