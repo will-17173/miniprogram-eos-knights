@@ -12,7 +12,11 @@
       </div>
     </div>
     <div class="content" v-if="currentTab === 0">
-1
+      <div class="item" v-for="(material, i) in myMaterials" :key="i">
+        {{material.name}}<br>
+        稀有度： {{material.rate}}<br>
+        类型: <span class="type" :class="'type' + material.type"></span>
+      </div>
     </div>
     <div class="content" v-if="currentTab === 1">
 2
@@ -86,6 +90,8 @@
 <script>
 import materials from '@/db/materials'
 import materialTypes from '@/db/material-types'
+import { GET_MY_MATERIALS } from '@/store/mutation-types'
+import { mapState } from 'vuex'
 
 export default {
   data(){
@@ -97,7 +103,9 @@ export default {
     }
   },
   computed:{
-
+    ...mapState({
+      myMaterials: state => state.myMaterials
+    })
   },
   methods: {
     switchTab(i){
@@ -113,6 +121,11 @@ export default {
         return category == categoryId;
       })
     }
+  },
+  mounted(){
+    const openId = this.$wx.getStorageSync('openId')
+    console.log(openId)
+    this.$store.dispatch(GET_MY_MATERIALS, { openId })
   }
 }
 </script>

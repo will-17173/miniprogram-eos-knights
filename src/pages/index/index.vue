@@ -58,12 +58,13 @@ import KnightData from '@/components/knightData';
 import kills from '@/rules/kills';
 import hpLeft from '@/rules/hpLeft';
 import maxSurviveTime from '@/rules/maxSurviveTime';
-import { showSuccess } from '@/utils';
+import { showSuccess, showModal } from '@/utils';
 import { POWDER_PER_KILL } from '@/constants'
 import { UPDATE_POWDER } from '@/store/mutation-types'
 import Powder from '@/components/powder'
 
 const db = wx.cloud.database({ env: config.cloudEnv });
+wx.cloud.init()
 
 export default {
   data() {
@@ -117,7 +118,22 @@ export default {
           this.totalKills = 0;
           this.$bus.$emit('rebirth');
           this.tick()
-          showSuccess('复活成功');
+          
+
+          wx.cloud
+            .callFunction({ name: 'material', data: {
+              owner: this.openId
+            } })
+            .then(res => {
+              let names = []
+              res.result.forEach(({ name }) => {
+                names.push(name)
+              })
+              names = names.join(',');
+              console.log(names)
+              showModal('复活成功', names)
+              // console.log(res.result)
+            })
         })
         .catch(console.error);
     },
@@ -144,15 +160,19 @@ export default {
   created() {},
   async mounted() {
     const openId = this.$wx.getStorageSync('openId');
+    
     if (!openId) {
       wx.cloud
         .callFunction({ name: 'user' })
         .then(res => {
           const openId = res.result.openId;
           this.$wx.setStorageSync('openId', openId);
+          this.openId = openId;
           return openId;
         })
         .catch(err => console.error(err));
+    } else{
+      this.openId = openId;
     }
 
     const res = await db.collection('knights').get();
