@@ -100,12 +100,12 @@ export default {
       this.last_rebirth = now
       
       this.knights = this.knights.map(knight => {
-        console.log(knight)
         knight.hpLeft = knight.hp;
         knight.kills = 0;
         return knight;
       })
       this.totalKills = 0;
+      this.tick()
 
       showSuccess('复活成功');
     },
@@ -120,8 +120,6 @@ export default {
 
         this.totalKills = this.knights[0].kills + this.knights[1].kills + this.knights[2].kills;
         this.currentFloor = Math.floor(this.totalKills / 10) + 1
-        console.log(this.totalKills )
-        
 
         let timePassed = Math.floor((Date.now() - this.last_rebirth) / 1000);
         if (timePassed > this.maxTime) {
