@@ -1,6 +1,7 @@
 {
   "pages": [
     "pages/index/main",
+    "pages/items/main",
     "pages/materials/main"
   ],
   "window": {
@@ -21,6 +22,12 @@
       {
         "pagePath": "pages/materials/main",
         "text": "材料",
+        "iconPath": "/static/img/home.png",
+        "selectedIconPath": "/static/img/home-fill.png"
+      },
+      {
+        "pagePath": "pages/items/main",
+        "text": "装备",
         "iconPath": "/static/img/home.png",
         "selectedIconPath": "/static/img/home-fill.png"
       }

@@ -4,3 +4,9 @@ export default {
   }
 };
 </script>
+
+<style lang="scss">
+  .container{
+    font-size: 28rpx;
+  }
+</style>

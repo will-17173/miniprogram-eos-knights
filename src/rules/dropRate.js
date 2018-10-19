@@ -5,8 +5,7 @@
     各层掉落概率(每层0.02%)
 */
 
-import { BASE_LUCK } from '@/constants'
-import { DROPRATE_EACH_FLOOR } from '@/constants'
+import { BASE_LUCK,  DROPRATE_EACH_FLOOR} from '@/constants'
 import stages from '@/db/stages'
 
 export default function(knight, currentFloor, stageId){

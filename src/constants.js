@@ -14,6 +14,9 @@ export const SHARE_SCENE_CODE = [
   1014, // 小程序模版消息
 ]
 
+// 调用云函数成功
+export const CALL_CLOUD_FUNCTION_OK = 'cloud.callFunction:ok'
+
 //英雄掉血系数 (怪物攻 - 英雄防) / 系数 = 每秒掉血 
 export const KNIGHT_HP_REDUCE_RATE = 10000
 
@@ -34,3 +37,6 @@ export const DEFAULT_MATERIALS_CAPACITY = 28
 
 // 默认装备格子数量
 export const DEFAULT_ITEM_CAPACITY = 12
+
+// 删除材料得到的魔幻水
+export const MATERIAL_DELETE_POWDER_RETURN = [8, 16, 32, 64, 128]
